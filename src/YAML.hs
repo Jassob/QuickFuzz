@@ -17,12 +17,11 @@ import qualified Data.Text as T
 
 $(devArbitrary ''YamlValue)
 
--- TODO: Fix this (in your domain. IN YOUR DOMAIN!)
---mencode :: YamlValue -> LC8.ByteString
---mencode = LC8.fromStrict . encodePretty defConfig
+mencode :: YamlValue -> LC8.ByteString
+mencode = encodeDocPretty
 
-encodePretty :: YamlValue -> ByteString
-encodePretty yv = case encodeDoc yv of
+encodeDocPretty :: YamlValue -> ByteString
+encodeDocPretty yv = case encodeDoc yv of
   Just d  -> pack . render $ d
   Nothing -> error ("Malformed YAML value: " ++ show yv)
 

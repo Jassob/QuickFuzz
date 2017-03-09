@@ -37,6 +37,7 @@ import qualified Js
 import qualified Python
 import qualified Dot
 import qualified JSON
+import qualified YAML
 import qualified GLSL
 import qualified Regex
 import qualified Lua
@@ -145,6 +146,7 @@ dispatch arg = do
             "Py"   -> Process.main (Python.mencode,undefined)  args b
             "CSS"  -> Process.main (Css.mencode,undefined)  args b
             "JSON"   -> Process.main (JSON.mencode,undefined) args b
+            "YAML"   -> Process.main (YAML.mencode, undefined) args b
             "GLSL"   -> Process.main (GLSL.mencode,undefined) args b
             "Regex" -> Process.main (Regex.mencode,undefined)  args b
             "Lua"   -> Process.main (Lua.mencode,undefined)  args b

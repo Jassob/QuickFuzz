@@ -83,8 +83,8 @@ executable QuickFuzz
                       ghc-mod, haskell-src-exts, haskell-src-meta 
   
   if flag(codes)
-      build-depends:   HaXml, language-ecmascript, language-dot, language-css, language-python, language-glsl, json, uniplate,
-                       language-lua, language-bash, shell-escape, blaze-markup, blaze-html
+      build-depends:   HaXml, language-ecmascript, language-dot, language-css, language-python, language-glsl, json, yaml, uniplate,
+                       language-lua, language-bash, shell-escape, blaze-markup, blaze-html, quickcheck-text
 
   if flag(imgs)
       build-depends:  zlib, JuicyPixels, svg-tree, xml, AC-PPM, blaze-markup, blaze-svg
