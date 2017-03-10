@@ -5,6 +5,7 @@ module YAML where
 import Control.Monad (mplus, forM)
 import Data.ByteString.Lazy.Char8 (ByteString, pack)
 import Data.ByteString.Char8 (unpack)
+import Data.Char
 import Data.Text.Arbitrary
 import Data.Yaml.Parser
 import DeriveArbitrary
@@ -13,9 +14,41 @@ import Text.Libyaml
 import Text.PrettyPrint
 
 import qualified Data.ByteString.Lazy.Char8 as LC8
+import qualified Data.ByteString.Char8 as C8
 import qualified Data.Text as T
 
-$(devArbitrary ''YamlValue)
+$(devArbitrary ''Tag)
+$(devArbitrary ''Text.Libyaml.Style)
+
+instance Arbitrary YamlValue where
+  arbitrary = genYamlValue
+
+genYamlValue = oneof [ genMapping, genSequence, genScalar]
+
+genMapping :: Gen YamlValue
+genMapping = Mapping <$> listOf1 genPair <*> genAnchor
+  where genPair :: Gen (Text, YamlValue)
+        genPair = (,) <$> genKey <*> genYamlValue
+
+genSequence :: Gen YamlValue
+genSequence = Sequence <$> listOf1 genYamlValue <*> genAnchor
+
+genScalar :: Gen YamlValue
+genScalar = Scalar <$> genBs <*> arbitrary <*> arbitrary <*> genAnchor
+  where genBs :: Gen C8.ByteString
+        genBs = C8.pack <$> genName
+
+genKey :: Gen Text
+genKey = T.pack <$> genName
+
+genAnchor :: Gen Anchor
+genAnchor = oneof [ return Nothing, Just <$> genName ]
+
+genName :: Gen String
+genName = listOf1 genChar
+  where genChar :: Gen Char
+        genChar = suchThat arbitrary (\c -> isPrint c
+                                       && not (elem c ['[',']','{','}',',']))
 
 mencode :: YamlValue -> LC8.ByteString
 mencode = encodeDocPretty
