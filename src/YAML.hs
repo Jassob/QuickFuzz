@@ -80,23 +80,25 @@ encodeSequence :: YamlValue -> Maybe Doc
 encodeSequence yvs = case yvs of
   Sequence lst an -> encodeAnchor an <$> encodeList lst
   _               -> Nothing
-  where encodeList lst = vcat <$> mapM (\v -> ("- " <>) <$> encodeDoc v) lst
+  where encodeList lst = vcat' <$> mapM (\v -> ("- " <>) <$> encodeDoc v) lst
 
 encodeMapping :: YamlValue -> Maybe Doc
 encodeMapping yv = case yv of
   Mapping alist an -> encodeAnchor an <$> encodeAlist alist
   _                -> Nothing
   where encodeAlist :: [(Text, YamlValue)] -> Maybe Doc
-        encodeAlist alist = vcat <$> mapM encodePair alist
+        encodeAlist alist = vcat' <$> mapM encodePair alist
 
         encodePair :: (Text, YamlValue) -> Maybe Doc
         encodePair (k, v) = indOrNl v (text (T.unpack k)) <$> encodeDoc v
 
         indOrNl :: YamlValue -> Doc -> Doc -> Doc
-        indOrNl (Mapping _ _)  d1 d2 = d1 <> ":" $$ nest 2 d2
-        indOrNl (Sequence _ _) d1 d2 = d1 <> ":" $$ nest 2 d2
+        indOrNl (Mapping _ _)  d1 d2 = d1 <> ":" $+$ nest 2 d2
+        indOrNl (Sequence _ _) d1 d2 = d1 <> ":" $+$ nest 2 d2
         indOrNl _              d1 d2 = d1 <> ":" <+> d2
 
+vcat' :: [Doc] -> Doc
+vcat' = foldr1 ($+$)
 
 indent :: YamlValue -> Doc -> Doc
 indent (Mapping _ _)     doc = nest 2 doc
@@ -113,8 +115,8 @@ encodeStyle s doc = case s of
   Plain        -> doc
   SingleQuoted -> quotes doc
   DoubleQuoted -> doubleQuotes doc
-  Literal      -> text " | " $$ nest 2 doc
-  Folded       -> text " > " $$ nest 2 doc
+  Literal      -> text " | " $+$ nest 2 doc
+  Folded       -> text " > " $+$ nest 2 doc
 
 encodeTag :: Tag -> Doc -> Doc
 encodeTag t doc = case t of
